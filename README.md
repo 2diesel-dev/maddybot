@@ -1,0 +1,2 @@
+# maddybot
+ discord logging bot
