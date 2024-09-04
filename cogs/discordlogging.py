@@ -76,23 +76,29 @@ class Logging(commands.Cog):
                 async with asqlite.connect("logs.db") as conn:
                     async with conn.cursor() as cursor:
                         await cursor.execute("""
-                            SELECT * FROM logs WHERE guild_id = ? AND member_id = ? 
-                            ORDER BY time DESC LIMIT ?
-                        """, (guild_id, member_id, amount))
+                            SELECT * FROM logs WHERE guild_id = ? AND member_id = ?
+                        """, (guild_id, member_id))
                         rows = await cursor.fetchall()
+                        # Select the last `amount` rows (newest entries)
+                        rows = rows[-amount:]
+                        rows.reverse()
                         with open(log_file, 'w') as f:
-                            for row in rows:
+                            # Write rows in reverse order to show newest first
+                            for row in reversed(rows):
                                 f.write(f'{row[7]}: {row[4]} ({row[3]}) said: \"{row[6]}\" in: {row[2]} ({row[1]}) message_id: {row[5]}\n')
             elif logtype == 'master':
                 async with asqlite.connect("master_logs.db") as conn:
                     async with conn.cursor() as cursor:
                         await cursor.execute("""
-                            SELECT * FROM master_logs WHERE guild_id = ? 
-                            ORDER BY time DESC LIMIT ?
-                        """, (guild_id, amount))
+                            SELECT * FROM master_logs WHERE guild_id = ?
+                        """, (guild_id))
                         rows = await cursor.fetchall()
+                        # Select the last `amount` rows (newest entries)
+                        rows = rows[-amount:]
+                        rows.reverse()
                         with open(log_file, 'w') as f:
-                            for row in rows:
+                            # Write rows in reverse order to show newest first
+                            for row in reversed(rows):
                                 f.write(f'{row[7]}: {row[4]} ({row[3]}) said: \"{row[6]}\" in: {row[2]} ({row[1]}) message_id: {row[5]}\n')
             return log_file
         except Exception as e:
